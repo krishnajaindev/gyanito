@@ -9,7 +9,7 @@ import {
 
 export default function Header() {
     const navLinks = [
-        { to: "/home", label: "Home" },
+        { to: "/", label: "Home" },
         { to: "/leaderboard", label: "Leaderboard" },
         { to: "/about", label: "About" },
     ];
