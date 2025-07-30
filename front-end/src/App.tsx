@@ -1,15 +1,11 @@
 
-import './App.css'
-import Header from "../src/shared/components/Header"
-import AppRoutes from './shared/routes/app-routs'
-function App() {
+import Header from "./shared/components/Header.tsx";
+import AppRoutes from "../src/shared/routes/AppRoutes.tsx";
 
-  return (
-      <div>
-          <Header/>
-          <AppRoutes/>
-      </div>
-  )
+const App = ()=>{
+  return (<div className="bg-[url('./assets/bg.jpg')] bg-no-repeat bg-center bg-cover min-h-screen overflow-hidden">
+    <Header/>
+    <AppRoutes/>
+  </div>)
 }
-
-export default App
+export default App;
