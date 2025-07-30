@@ -4,6 +4,7 @@ import About from "../../modules/users/pages/About.tsx";
 import Leaderboard from "../../modules/users/pages/Leaderboard.tsx";
 import Signup from "../../modules/users/pages/SignUp.tsx";
 import Login from "../../modules/users/pages/Login.tsx";
+import Dashboard from "@/modules/users/pages/Dashboard.tsx";
 
 
 const AppRoutes = ()=>{
@@ -14,6 +15,7 @@ const AppRoutes = ()=>{
              <Route path="/leaderboard" element={<Leaderboard/>}/>
              <Route path="/signup" element={<Signup/>}/>
             <Route path="/login" element={<Login/>}/>
+            <Route path="/dashboard"element={<Dashboard/>}></Route>
         </Routes>
     </>)
 
