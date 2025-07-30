@@ -12,6 +12,7 @@ export default function Header() {
         { to: "/", label: "Home" },
         { to: "/leaderboard", label: "Leaderboard" },
         { to: "/about", label: "About" },
+
     ];
 
     return (
