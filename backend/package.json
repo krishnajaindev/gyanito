@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "chalk": "^5.4.1",
     "compression": "^1.8.1",
@@ -27,6 +28,7 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemon": "^3.1.10",
+    "routes": "^2.1.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {

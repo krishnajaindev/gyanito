@@ -6,7 +6,9 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 
 
+
 export const applyGlobalMiddleware = (app) => {
+  
   app.use(cors());                     // CORS for cross-origin requests
   app.use(express.json());            // Parse JSON request bodies
   app.use(helmet());                  // Secure HTTP headers
