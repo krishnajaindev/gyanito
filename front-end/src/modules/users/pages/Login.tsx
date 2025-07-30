@@ -46,9 +46,15 @@ const Login = () => {
         localStorage.setItem("role", result.data.role);
         localStorage.setItem("token", result.data.token);
         setMessage(result.data.message);
+        if(result.data.role == "admin"){
+            navigate("/admindashboard");
+        }
 
         // ✅ Navigate to User Dashboard
-        navigate("/dashboard");
+        else{
+
+            navigate("/dashboard");
+        }
       } else {
         setMessage(result.data.message);
       }
