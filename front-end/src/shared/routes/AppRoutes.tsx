@@ -5,6 +5,12 @@ import Leaderboard from "../../modules/users/pages/Leaderboard.tsx";
 import Signup from "../../modules/users/pages/SignUp.tsx";
 import Login from "../../modules/users/pages/Login.tsx";
 import Dashboard from "@/modules/users/pages/Dashboard.tsx";
+import AdminDashboard from "@/modules/users/pages/adminDashboard.tsx";
+import CreateQuiz from "@/modules/users/pages/CretaeQuiz.tsx";
+import EditQuiz from "@/modules/users/pages/EditQuiz.tsx";
+import QuizPage from "@/modules/users/pages/Quizpage.tsx";
+
+
 
 
 const AppRoutes = ()=>{
@@ -16,6 +22,11 @@ const AppRoutes = ()=>{
              <Route path="/signup" element={<Signup/>}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/dashboard"element={<Dashboard/>}></Route>
+            <Route path="/admindashboard"element={<AdminDashboard/>}></Route>
+            <Route path="/admin/create-quiz" element={<CreateQuiz />} />
+            <Route path="/admin/edit-quiz/:id" element={<EditQuiz />} />
+            <Route path="/quiz/:id" element={<QuizPage />} />
+
         </Routes>
     </>)
 

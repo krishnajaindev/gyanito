@@ -32,7 +32,7 @@ const io = new Server(server, {
 const startServer = async () => {
   await connectDB();
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 3003;
   server.listen(PORT, () => {
     console.log(
       chalk.blueBright(

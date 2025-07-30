@@ -5,7 +5,8 @@ import {
   getQuizById,
   submitQuiz,
   updateQuiz,
-  deleteQuiz
+  deleteQuiz,
+  
 } from "../../../controllers/quiz-controller.js";
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.post("/submit", submitQuiz);
 // Add this new route to quiz-routes.js
 router.put("/update/:id", updateQuiz); // New update route
 router.delete("/delete/:id", deleteQuiz);
+
 
 
 

@@ -26,7 +26,7 @@ export const createQuiz = async (req, res) => {
 // Get all quizzes
 export const getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await QuizModel.find().select("title description");
+    const quizzes = await QuizModel.find().select("title description duration");
     res.status(200).json(quizzes);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -36,7 +36,7 @@ export const getAllQuizzes = async (req, res) => {
 // Get a quiz with questions
 export const getQuizById = async (req, res) => {
   try {
-    const quiz = await QuizModel.findById(req.params.id).populate("questions", "-correctAnswerIndex");
+    const quiz = await QuizModel.findById(req.params.id).populate("questions");
     if (!quiz) return res.status(404).json({ message: "Quiz not found" });
     res.status(200).json(quiz);
   } catch (err) {
@@ -51,6 +51,9 @@ export const submitQuiz = async (req, res) => {
     let score = 0;
 
     for (const { questionId, selectedIndex } of answers) {
+      // Skip invalid selections (like -1)
+      if (selectedIndex < 0) continue;
+      
       const question = await QuestionModel.findById(questionId);
       if (question && question.correctAnswerIndex === selectedIndex) {
         score++;
@@ -126,3 +129,4 @@ export const deleteQuiz = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
