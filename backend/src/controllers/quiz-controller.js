@@ -109,3 +109,20 @@ export const updateQuiz = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const deleteQuiz = async (req, res) => {
+  try {
+    const quiz = await QuizModel.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+
+    // Delete all questions in the quiz
+    await QuestionModel.deleteMany({ _id: { $in: quiz.questions } });
+
+    // Delete the quiz itself
+    await QuizModel.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: "Quiz and its questions deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
