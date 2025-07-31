@@ -37,7 +37,7 @@ const Login = () => {
     },
   });
 
-  const onSubmit = async (userObject: any) => {
+  const onSubmit = async (userObject: unknown) => {
     try {
       const result = await doLogin(userObject);
       console.log("Result ", result);

@@ -2,9 +2,8 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import chalk from "chalk";
-
+import cors from "cors";
 import { connectDB } from "./src/config/db/db-connection.js";
-import { applyGlobalMiddleware } from "./src/middleware/global-middleware.js";
 import { Error404 } from "./src/middleware/error.js";
 import dotenv from "dotenv";
 import { indexRoute } from "./src/api/v1/routes/index.js";
@@ -13,7 +12,9 @@ const server = createServer(app);
 dotenv.config();
 
 
-applyGlobalMiddleware(app);
+
+app.use(cors());                     // CORS for cross-origin requests
+app.use(express.json());            // Parse JSON request bodies
 app.use('/api/v1', indexRoute);
 
 // app.use("./src/api/v1", indexRoute);

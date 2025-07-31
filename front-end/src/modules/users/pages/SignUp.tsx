@@ -88,7 +88,7 @@ const Register = () => {
             REGISTER HERE
           </CardTitle>
           <CardDescription className={theme.description}>
-            Join the Music App Universe
+            Join the Quiz App Universe
           </CardDescription>
         </CardHeader>
 

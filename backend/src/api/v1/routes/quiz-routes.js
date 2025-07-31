@@ -15,8 +15,8 @@ router.post("/create", createQuiz);
 router.get("/", getAllQuizzes);
 router.get("/:id", getQuizById);
 router.post("/submit", submitQuiz);
-// Add this new route to quiz-routes.js
-router.put("/update/:id", updateQuiz); // New update route
+
+router.put("/update/:id", updateQuiz); 
 router.delete("/delete/:id", deleteQuiz);
 
 
