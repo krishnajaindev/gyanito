@@ -8,28 +8,67 @@ import Dashboard from "@/modules/users/pages/Dashboard.tsx";
 import AdminDashboard from "@/modules/users/pages/adminDashboard.tsx";
 import CreateQuiz from "@/modules/users/pages/CretaeQuiz.tsx";
 import EditQuiz from "@/modules/users/pages/EditQuiz.tsx";
-import QuizPage from "@/modules/users/pages/Quizpage.tsx";
+import QuizPage from "@/modules/users/pages/QuizPage.tsx";
+import ProtectedRoute from "../components/ProtectedRoute.tsx";
+import NotFound from "@/modules/users/pages/NotFound.tsx";
+import ErrorPage from "@/modules/users/pages/ErrorPage.tsx";
 
-
-
-
-const AppRoutes = ()=>{
-    return (<>
-        <Routes>
-              <Route path="/" element={<Home/>}/>
-             <Route path="/about" element={<About/>}/>
-             <Route path="/leaderboard" element={<Leaderboard/>}/>
-             <Route path="/signup" element={<Signup/>}/>
-            <Route path="/login" element={<Login/>}/>
-            <Route path="/dashboard"element={<Dashboard/>}></Route>
-            <Route path="/admindashboard"element={<AdminDashboard/>}></Route>
-            <Route path="/admin/create-quiz" element={<CreateQuiz />} />
-            <Route path="/admin/edit-quiz/:id" element={<EditQuiz />} />
-            <Route path="/quiz/:id" element={<QuizPage />} />
-
-        </Routes>
-    </>)
-
-}
+const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      
+      {/* Protected User Routes */}
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="/quiz/:id" element={
+        <ProtectedRoute>
+          <QuizPage />
+        </ProtectedRoute>
+      } />
+      
+      {/* Protected Admin Routes */}
+      <Route 
+        path="/admindashboard" 
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/create-quiz" 
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <CreateQuiz />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/edit-quiz/:id" 
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <EditQuiz />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Error Routes */}
+      <Route path="/error" element={<ErrorPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
 
 export default AppRoutes;

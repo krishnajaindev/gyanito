@@ -4,22 +4,25 @@ import { Server } from "socket.io";
 import chalk from "chalk";
 import cors from "cors";
 import { connectDB } from "./src/config/db/db-connection.js";
-import { Error404 } from "./src/middleware/error.js";
+import { Error404, errorHandler } from "./src/middleware/error.js";
 import dotenv from "dotenv";
 import { indexRoute } from "./src/api/v1/routes/index.js";
+
+
+
+
+
 const app = express();
 const server = createServer(app);
 dotenv.config();
-
-
 
 app.use(cors());                     // CORS for cross-origin requests
 app.use(express.json());            // Parse JSON request bodies
 app.use('/api/v1', indexRoute);
 
-// app.use("./src/api/v1", indexRoute);
-
-app.use(Error404)
+// Error handling middleware
+app.use(Error404);
+app.use(errorHandler);
 
 
 const io = new Server(server, {

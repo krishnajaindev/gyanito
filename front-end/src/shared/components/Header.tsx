@@ -1,13 +1,23 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { useAuth } from '../context/AuthContext';
+import { Button } from '@/components/ui/button';
 
 export default function Header() {
+    const { isAuthenticated, user, logout } = useAuth();
+    const navigate = useNavigate();
+    
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+    
     const navLinks = [
         { to: "/", label: "Home" },
         { to: "/leaderboard", label: "Leaderboard" },
@@ -44,18 +54,45 @@ export default function Header() {
             </div>
 
             <div className="hidden md:flex items-center gap-6">
-                 <Link
-                    to="/login"
-                    className="relative group text-lg font-medium text-slate-200 transition-colors duration-300 hover:bg-gradient-to-r hover:from-sky-400 hover:to-cyan-300 hover:bg-clip-text hover:text-transparent"
-                >
-                    Login
-                </Link>
-                <Link
-                    to="/signup"
-                    className="px-6 py-2 text-lg font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out"
-                >
-                    Sign Up
-                </Link>
+                {isAuthenticated ? (
+                    <>
+                        {user?.role === 'admin' && (
+                            <Link
+                                to="/admindashboard"
+                                className="relative group text-lg font-medium text-slate-200 transition-colors duration-300 hover:bg-gradient-to-r hover:from-sky-400 hover:to-cyan-300 hover:bg-clip-text hover:text-transparent"
+                            >
+                                Admin
+                            </Link>
+                        )}
+                        <Link
+                            to="/dashboard"
+                            className="relative group text-lg font-medium text-slate-200 transition-colors duration-300 hover:bg-gradient-to-r hover:from-sky-400 hover:to-cyan-300 hover:bg-clip-text hover:text-transparent"
+                        >
+                            Dashboard
+                        </Link>
+                        <Button
+                            onClick={handleLogout}
+                            className="px-6 py-2 text-lg font-semibold text-white bg-gradient-to-r from-red-500 to-orange-500 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out"
+                        >
+                            Logout
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <Link
+                            to="/login"
+                            className="relative group text-lg font-medium text-slate-200 transition-colors duration-300 hover:bg-gradient-to-r hover:from-sky-400 hover:to-cyan-300 hover:bg-clip-text hover:text-transparent"
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            to="/signup"
+                            className="px-6 py-2 text-lg font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out"
+                        >
+                            Sign Up
+                        </Link>
+                    </>
+                )}
             </div>
 
             <div className="md:hidden">

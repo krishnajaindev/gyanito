@@ -6,10 +6,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validations/register-validation";
 import { doLogin } from "../api/user-api";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useState } from "react";
-import { Angry } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/shared/context/AuthContext";
+import AuthNotification from "../../../shared/components/AuthNotification";
 
 const theme = {
   card: "bg-purple-900/40 border-purple-600/50 backdrop-blur-sm",
@@ -23,7 +23,17 @@ const theme = {
 
 const Login = () => {
   const [message, setMessage] = useState("");
+  const [alertType, setAlertType] = useState<"error" | "success" | "">("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login: authLogin, redirectToUserDashboard, isAuthenticated, user } = useAuth();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      redirectToUserDashboard();
+    }
+  }, [isAuthenticated, user, redirectToUserDashboard]);
 
   const {
     register,
@@ -37,30 +47,46 @@ const Login = () => {
     },
   });
 
-  const onSubmit = async (userObject: unknown) => {
+  const onSubmit = async (userData: { email: string; password: string }) => {
+    setIsLoading(true);
+    setAlertType("");
+    setMessage("");
+    
     try {
-      const result = await doLogin(userObject);
-      console.log("Result ", result);
-
-      if (result.data.message) {
-        localStorage.setItem("role", result.data.role);
-        localStorage.setItem("token", result.data.token);
-        setMessage(result.data.message);
-        if(result.data.role == "admin"){
-            navigate("/admindashboard");
-        }
-
-        // ✅ Navigate to User Dashboard
-        else{
-
-            navigate("/dashboard");
-        }
+      const result = await doLogin(userData);
+      
+      // Check if login was successful (status is true or message exists with no false status)
+      if (result.data.status === true || (result.data.message && result.data.status !== false)) {
+        // Show success message first
+        setAlertType("success");
+        setMessage(result.data.message || "Login successful! Redirecting...");
+        
+        // Short delay for user feedback before redirect
+        setTimeout(() => {
+          // Use the AuthContext login function instead of directly setting localStorage
+          authLogin(result.data.token, result.data.role, result.data.userId);
+          
+          // Use redirectToUserDashboard instead of manual navigation
+          // The redirection will happen automatically via the useEffect
+        }, 1000);
       } else {
-        setMessage(result.data.message);
+        // Login failed with a specific message from the server
+        setAlertType("error");
+        setMessage(result.data.message || "Invalid credentials");
       }
     } catch (err) {
-      console.log("Login failed", err);
-      setMessage("Login failed. Please try again.");
+      console.error("Login failed", err);
+      setAlertType("error");
+      
+      // Extract error message from response if available
+      if (err && typeof err === "object" && "response" in err) {
+        const errorResponse = err as { response?: { data?: { message?: string } } };
+        setMessage(errorResponse.response?.data?.message || "Login failed. Please try again.");
+      } else {
+        setMessage("Login failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,14 +98,11 @@ const Login = () => {
           <CardDescription className={theme.description}>Enter the Quiz Universe</CardDescription>
         </CardHeader>
         <CardContent>
-          {message && (
-            <Alert>
-              <AlertTitle className="flex items-center gap-1">
-                <Angry className="w-4 h-4" /> Message
-              </AlertTitle>
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
+          <AuthNotification 
+            type={alertType}
+            message={message}
+            onClose={() => setMessage('')}
+          />
 
           <form className="space-y-6 pt-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid w-full items-center gap-2">
@@ -115,9 +138,22 @@ const Login = () => {
             </div>
 
             <div className="pt-4">
-              <Button className={`w-full ${theme.button}`} type="submit">
-                Let&apos;s Go!
+              <Button 
+                className={`w-full ${theme.button}`} 
+                type="submit" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Let's Go!"}
               </Button>
+              
+              <div className="mt-4 text-center">
+                <p className="text-sm text-indigo-300">
+                  Don't have an account?{' '}
+                  <Link to="/signup" className="text-fuchsia-400 hover:underline">
+                    Register here
+                  </Link>
+                </p>
+              </div>
             </div>
           </form>
         </CardContent>

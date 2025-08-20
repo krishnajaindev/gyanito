@@ -9,15 +9,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Angry } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validations/register-validation";
 import type { RegisterSchemaType } from "../validations/register-validation";
 import { doRegister } from "../api/user-api";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/shared/context/AuthContext";
+import AuthNotification from "../../../shared/components/AuthNotification";
 
 // UI Theme config
 const theme = {
@@ -33,9 +35,11 @@ const theme = {
 };
 
 const Register = () => {
-  const [status, setStatus] = useState(false);
+  const [alertType, setAlertType] = useState<"error" | "success" | "">("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
 
   const {
     register,
@@ -50,31 +54,57 @@ const Register = () => {
     },
   });
 
+  const { isAuthenticated, redirectToUserDashboard } = useAuth();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      redirectToUserDashboard();
+    }
+  }, [isAuthenticated, redirectToUserDashboard]);
+
   const registerSubmit = async (userData: RegisterSchemaType) => {
+    setIsLoading(true);
+    setAlertType("");
+    setMessage("");
+    
     try {
+      // Pass the userData object directly to doRegister
       const result = await doRegister(userData);
-      if (result.data.message) {
-        setStatus(false);
-        navigate("/login");
+      
+      // Check if registration was successful
+      if (result.data.status === true || (result.data.message && result.data.status !== false)) {
+        // Show success message
+        setAlertType("success");
+        setMessage(result.data.message || "Registration successful! Redirecting to login...");
+        
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
       } else {
-        setStatus(true);
-        setMessage("Unable to register...");
+        // Registration failed with a specific message
+        setAlertType("error");
+        setMessage(result.data.message || "Unable to register. Please try again.");
       }
     } catch (err: unknown) {
-      setStatus(true);
-
+      setAlertType("error");
+      
+      // Extract error message from response if available
       if (typeof err === "object" && err !== null && "response" in err) {
         const errorResponse = err as {
           response?: { data?: { message?: string } };
         };
         setMessage(
-          errorResponse.response?.data?.message || "Something went wrong."
+          errorResponse.response?.data?.message || "Registration failed. Please try again."
         );
       } else {
-        setMessage("Something went wrong.");
+        setMessage("Registration failed. Please try again.");
       }
-
+      
       console.error("Register Fail", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -93,13 +123,11 @@ const Register = () => {
         </CardHeader>
 
         <CardContent>
-          {status && (
-            <Alert variant="destructive" className="mb-4">
-              <Angry />
-              <AlertTitle>Register Message</AlertTitle>
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
+          <AuthNotification 
+            type={alertType}
+            message={message}
+            onClose={() => setMessage('')}
+          />
 
           <form onSubmit={handleSubmit(registerSubmit)} className="space-y-5">
             <div className="grid w-full items-center gap-2">
@@ -151,9 +179,20 @@ const Register = () => {
             </div>
 
             <div className="pt-4">
-              <Button type="submit" className={`w-full ${theme.button}`}>
-                Create Account
+              <Button 
+                type="submit" 
+                className={`w-full ${theme.button}`}
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
+              
+              <div className="mt-4 text-center">
+                <span className="text-indigo-200">Already have an account? </span>
+                <Link to="/login" className="text-fuchsia-400 hover:text-fuchsia-300">
+                  Login here
+                </Link>
+              </div>
             </div>
           </form>
         </CardContent>
