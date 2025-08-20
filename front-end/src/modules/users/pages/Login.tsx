@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validations/register-validation";
 import { doLogin } from "../api/user-api";
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/shared/context/AuthContext";
 import AuthNotification from "../../../shared/components/AuthNotification";
 
@@ -25,7 +25,7 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const [alertType, setAlertType] = useState<"error" | "success" | "">("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  
   const { login: authLogin, redirectToUserDashboard, isAuthenticated, user } = useAuth();
   
   // Redirect if already authenticated
