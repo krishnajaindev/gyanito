@@ -16,7 +16,11 @@ const app = express();
 const server = createServer(app);
 dotenv.config();
 
-app.use(cors());                     // CORS for cross-origin requests
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));                    // CORS for cross-origin requests
 app.use(express.json());            // Parse JSON request bodies
 app.use('/api/v1', indexRoute);
 
