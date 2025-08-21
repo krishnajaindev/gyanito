@@ -6,11 +6,11 @@ import { Server } from "socket.io";
 import chalk from "chalk";
 import cors from "cors";
 import dotenv from "dotenv";
-import helmet from "helmet"; // Re-added: Security headers
-import compression from "compression"; // Re-added: Gzip compression
-import cookieParser from "cookie-parser"; // Re-added: Cookie parsing
-import morgan from "morgan"; // Re-added: HTTP request logging
-import rateLimit from "express-rate-limit"; // Re-added: Rate limiting
+import helmet from "helmet";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 
 // Import your custom DB connection function and Error middleware
 import { connectDB } from "./src/config/db/db-connection.js";
@@ -26,85 +26,67 @@ const app = express();
 const server = createServer(app);
 
 // --- GLOBAL MIDDLEWARE ---
-// Middleware functions are executed in the order they are defined.
-
-// Enable Cross-Origin Resource Sharing (CORS) for all requests.
-// This should generally be one of the first middleware to handle preflight requests.
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*", // Use env var for frontend URL in production
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allow common methods
-  credentials: true // Allow cookies to be sent with cross-origin requests
+  origin: process.env.FRONTEND_URL || "*",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  credentials: true
 }));
-
-// Apply security headers to responses using Helmet.
 app.use(helmet());
-
-// Compress all outgoing responses with Gzip.
 app.use(compression());
-
-// Parse incoming JSON payloads from request bodies.
 app.use(express.json());
-
-// Parse Cookie header and populate `req.cookies`.
 app.use(cookieParser());
-
-// HTTP request logger middleware for Node.js.
 app.use(morgan("dev"));
-
-// Apply rate limiting to all requests.
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: "Too many requests from this IP, please try again after 15 minutes",
-    // Optional: headers: true // Add X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset headers
   })
 );
 
-
 // --- HEALTH CHECK ENDPOINT ---
-// This endpoint is specifically for monitoring services (like UptimeRobot)
-// to check if the server is alive and responsive.
-// It should be placed BEFORE your main API routes.
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "success",
     message: "Gyanito Backend is healthy and running!",
-    uptime: process.uptime(), // How long the server has been running
+    uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
 });
 
+// --- ADDED: ROOT PATH HANDLER ---
+// This route will handle requests to the base URL (e.g., https://gyanito-w88f.onrender.com/)
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to the Gyanito Backend API!",
+    healthCheck: "/health",
+    apiVersion: "/api/v1",
+  });
+});
+
 // --- API ROUTES ---
-// Mount your main API routes under the /api/v1 path.
 app.use('/api/v1', indexRoute);
 
 // --- ERROR HANDLING MIDDLEWARE ---
-// This middleware should be the LAST one to catch any requests
-// that haven't been handled by previous routes or middleware.
-// It acts as a catch-all for 404 Not Found errors and other unhandled errors.
-app.use(Error404);
+app.use(Error404); // This should be the very last middleware
 
 
 // --- SOCKET.IO INITIALIZATION ---
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "*", // Use env var for frontend URL in production
-    methods: ["GET", "POST"], // Only allow GET/POST for Socket.IO handshake
-    credentials: true // Allow cookies to be sent with cross-origin Socket.IO requests
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true
   },
-  // Optional: Add pingInterval and pingTimeout for more robust connection management
-  // pingInterval: 25000, // Client sends a ping every 25 seconds
-  // pingTimeout: 20000,  // Server waits 20 seconds for a pong response
 });
 
 // --- DATABASE CONNECTION & SERVER START ---
 const startServer = async () => {
   try {
-    await connectDB(); // Connect to MongoDB
+    await connectDB();
     console.log(chalk.green("✅ MongoDB connected successfully!"));
 
-    const PORT = process.env.PORT || 3003; // Use 3003 as a common dev port
+    const PORT = process.env.PORT || 3003;
     server.listen(PORT, () => {
       console.log(chalk.blueBright(`🚀 Gyanito Backend Server running on http://localhost:${PORT}`));
       console.log(chalk.cyanBright(`💡 Access Health Check at http://localhost:${PORT}/health`));
@@ -113,7 +95,6 @@ const startServer = async () => {
 
   } catch (err) {
     console.error(chalk.red("❌ Failed to start server due to database connection error:"), err);
-    // Exit the process if DB connection fails at startup
     process.exit(1);
   }
 };
@@ -121,30 +102,11 @@ const startServer = async () => {
 startServer();
 
 // --- SOCKET.IO EVENT HANDLING ---
-// Listen for new Socket.IO client connections.
 io.on("connection", (socket) => {
   console.log(chalk.blueBright(`🟢 New client connected: ${socket.id}`));
-
-  // Listen for client disconnections.
   socket.on("disconnect", () => {
     console.log(chalk.magentaBright(`🔴 Client disconnected: ${socket.id}`));
   });
-
-  // --- Add more Socket.IO event listeners here for quiz-specific logic ---
-  // Example: Listen for a 'joinQuiz' event from a client
-  // socket.on('joinQuiz', (quizId) => {
-  //   socket.join(quizId); // Add the socket to a specific room for that quiz
-  //   console.log(`Client ${socket.id} joined quiz room: ${quizId}`);
-  //   // io.to(quizId).emit('quizUpdate', 'A new player joined!'); // Notify others in the room
-  // });
-
-  // Example: Listen for a 'submitAnswer' event
-  // socket.on('submitAnswer', (data) => {
-  //   // Process the answer, calculate score, and emit updates
-  //   console.log(`Answer submitted by ${socket.id} for quiz ${data.quizId}: ${data.answer}`);
-  //   // socket.emit('yourScore', { score: 10 }); // Send score back to individual client
-  //   // io.to(data.quizId).emit('leaderboardUpdate', { updatedLeaderboard: [...] }); // Update leaderboard for all in room
-  // });
 });
 
 // Optional: Graceful shutdown for production
